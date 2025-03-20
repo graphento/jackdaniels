@@ -1,0 +1,22 @@
+class Result {
+    field int result;
+    field boolean ok;
+
+    constructor Result new(int res, boolean success) {
+        let result = res;
+        let ok = success;
+        return this;
+    }
+
+    method boolean isOk() {
+        return ok;
+    }
+
+    method boolean isError() {
+        return ~ok;
+    }
+
+    method int getResult() {
+        return result;
+    }
+}

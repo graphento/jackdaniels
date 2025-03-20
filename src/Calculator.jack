@@ -1,0 +1,117 @@
+class Calculator {
+    field char exitKey;
+    field char backspace;
+    field Array reservedKeys;
+
+    constructor Calculator new() {
+        let exitKey = 81; // Q
+        let backspace = String.backSpace();
+
+        let reservedKeys = Array.new(128);
+        let reservedKeys[exitKey] = true;
+        let reservedKeys[backspace] = true;
+        return this;
+    }
+
+    method void start() {
+        var char key;
+        var boolean exit;
+        var String input;
+
+        let input = String.new(1000);
+        let exit = false;
+
+        do updateResult(input);
+
+        while (~exit) {
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+            }
+
+            if (key = exitKey) {
+                let exit = true;
+            }
+
+            if (key = backspace) {
+                do input.eraseLastChar();
+                do updateResult(input);
+            }
+
+            if (~(reservedKeys[key])) {
+                do input.appendChar(key);
+                do updateResult(input);
+            }
+
+            // waits for the key to be released.
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+            }
+        }
+            
+        return;
+    }
+
+    method void updateResult(String input) {
+        var String result;
+        do Screen.clearScreen();
+        do Output.moveCursor(0, 0);
+        do Output.printString("Input: ");
+        do Output.printString(input);
+        do Output.println();
+        do Output.printString("Result: ");
+
+        let result = Eval.eval(input);
+        do Output.printString(result);
+        do result.dispose(); // Freeing stuff so make calculator op
+
+        do Output.println();
+        do Output.println();
+        do Output.printString("How to use: ");
+        do Output.println();
+        do Output.printString("1. Enter an expression, get result instantly.");
+        do Output.println();
+        do Output.printString("2. Press the backspace to delete a character.");
+        do Output.println();
+        do Output.printString("3. Ignores spaces, letters, your name, pincode, birthday, etc.");
+        do Output.println();
+        do Output.printString("4. Supports +, -, *, /, brackets, numbers greater 32767.");
+        do Output.println();
+        do Output.printString("5. Does not support negativing expressions, mult by brackets.");
+        do Output.println();
+        do Output.printString("6. Press Shift + Q to quit.");
+        do Output.println();
+
+        do Output.printString("  _______");
+        do Output.println();
+        do Output.printString(" |       |");
+        do Output.println();
+        do Output.printString(" | (___) |");
+        do Output.println();
+        do Output.printString(" |       |");
+        do Output.println();
+        do Output.printString(" | 7 8 9 |");
+        do Output.println();
+        do Output.printString(" |       |");
+        do Output.println();
+        do Output.printString(" | 4 5 6 |");
+        do Output.println();
+        do Output.printString(" |       |");
+        do Output.println();
+        do Output.printString(" | 1 2 3 |");
+        do Output.println();
+        do Output.printString(" |       |");
+        do Output.println();
+        do Output.printString(" | + - = |");
+        do Output.println();
+        do Output.printString(" |_______|");
+        do Output.println();
+
+
+        return;
+    }
+
+    method void dispose() {
+        do reservedKeys.dispose();
+        return;
+    }
+}

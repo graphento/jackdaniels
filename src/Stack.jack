@@ -1,0 +1,58 @@
+class Stack {
+    field int capacity;
+    field int size;
+    field Array elements;
+
+    constructor Stack new(int maxSize) {
+        let capacity = maxSize;
+        let size = 0;
+        let elements = Array.new(maxSize);
+        return this;
+    }
+
+    method void push(int x) {
+        if (size = capacity) {
+            do Sys.error(2200);
+        }
+        let elements[size] = x;
+        let size = size + 1;
+        return;
+    }
+
+    method int pop() {
+        if (size = 0) {
+            do Sys.error(2201);
+        }
+        let size = size - 1;
+        return elements[size];
+    }
+
+    method int top() {
+        if (size = 0) {
+            do Sys.error(2202);
+        }
+        return elements[size - 1];
+    }
+
+    method int size() {
+        return size;
+    }
+
+    method boolean isEmpty() {
+        return size = 0;
+    }
+
+    method boolean isFull() {
+        return size = capacity;
+    }
+
+    method void clear() {
+        let size = 0;
+        return;
+    }
+
+    method void dispose() {
+        do elements.dispose();
+        return;
+    }
+}

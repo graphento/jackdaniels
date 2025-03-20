@@ -1,0 +1,13 @@
+class Main {
+    function void main () {
+        var Calculator calculator;
+
+        do Debug.init();
+        do Debug.enable();
+        do Eval.init();
+        
+        let calculator = Calculator.new();
+        do calculator.start();
+        return;
+    }
+}
