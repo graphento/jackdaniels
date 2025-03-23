@@ -1,0 +1,11 @@
+ВАЖНЕЙШЕЕ ЗАМЕЧАНИЕ В ЖИЗНИ ЭТОЙ ХУЙНИ НА ДЖЕКЕ
+ЛЮБОЙ var в функции в цикле ПРИВОДИТ that К overflow
+
+stack.jack
+2200 - stack overflow
+2201 - tried to pop, stack is empty
+2202 - tried to get top, stack is empty
+2203 - negative size
+
+calc.jack
+2300 - tried to apply unregistered op

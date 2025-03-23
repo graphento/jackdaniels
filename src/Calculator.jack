@@ -1,45 +1,86 @@
 class Calculator {
-    field char exitKey;
-    field char backspace;
-    field Array reservedKeys;
+    // я не буду переписывать это в списки
+    static String s_input;
+    static String s_result;
+    static String s_error;
+    static String s_summary_0;
+    static String s_summary_1;
+    static String s_summary_2;
+    static String s_summary_3;
+    static String s_summary_4;
+    static String s_summary_5;
+    static String s_summary_6;
+    static String s_summary_7;
+    static String s_summary_8;
+    static String s_summary_9;
+    static String s_summary_10;
+    static String s_summary_11;
+    static String s_summary_12;
+    static String s_summary_13;
+    static String s_summary_14;
+    static String s_summary_15;
+    static String s_summary_16;
+    static String s_summary_17;
+    static String s_summary_18;
 
-    constructor Calculator new() {
-        let exitKey = 81; // Q
-        let backspace = String.backSpace();
+    static char key;
+    static boolean exit;
+    static String input;
+    static Result result;
 
-        let reservedKeys = Array.new(128);
-        let reservedKeys[exitKey] = true;
-        let reservedKeys[backspace] = true;
-        return this;
+    function void init() {
+        let s_input = "Input: ";
+        let s_result = "Result: ";
+        let s_error = "Error: ";
+        let s_summary_0 = "How to use: ";
+        let s_summary_1 = "1. Enter an expression, get result instantly.";
+        let s_summary_2 = "2. Press the backspace to delete a character.";
+        let s_summary_3 = "3. Ignores spaces, letters, your name, pincode, birthday, etc.";
+        let s_summary_4 = "4. Supports +, -, *, /, <, =, >, m as min, M as max, ( and ).";
+        let s_summary_5 = "5. Does not support negativing expressions, mult by brackets.";
+        let s_summary_6 = "6. Press Shift + Q to quit.";
+        let s_summary_7 =  "  _______ ";
+        let s_summary_8 =  " |       |";
+        let s_summary_9 =  " | (___) |";
+        let s_summary_10 = " |       |";
+        let s_summary_11 = " | 7 8 9 |";
+        let s_summary_12 = " |       |";
+        let s_summary_13 = " | 4 5 6 |";
+        let s_summary_14 = " |       |";
+        let s_summary_15 = " | 1 2 3 |";
+        let s_summary_16 = " |       |";
+        let s_summary_17 = " | + - = |";
+        let s_summary_18 = " |_______|";
+        
+        return;
     }
 
-    method void start() {
-        var char key;
-        var boolean exit;
-        var String input;
-
-        let input = String.new(1000);
+    function void start() {
+        let input = String.new(1401); // fill full fucking screen with input lol
         let exit = false;
 
-        do updateResult(input);
+        do Calculator.updateResult(input, Eval.eval(input));
 
         while (~exit) {
             while (key = 0) {
                 let key = Keyboard.keyPressed();
             }
 
-            if (key = exitKey) {
+            if (key = 81) { // shift Q
                 let exit = true;
             }
+            else {
+                if (key = 129) { // backspace
+                    if (input.length() > 0) {
+                        do input.eraseLastChar();
+                    }
+                }
+                else {
+                    do input.appendChar(key);
+                }
 
-            if (key = backspace) {
-                do input.eraseLastChar();
-                do updateResult(input);
-            }
-
-            if (~(reservedKeys[key])) {
-                do input.appendChar(key);
-                do updateResult(input);
+                do Printer.clear();
+                do Calculator.updateResult(input, Eval.eval(input));
             }
 
             // waits for the key to be released.
@@ -47,71 +88,47 @@ class Calculator {
                 let key = Keyboard.keyPressed();
             }
         }
-            
+        
+        do input.dispose();
         return;
     }
 
-    method void updateResult(String input) {
-        var String result;
-        do Screen.clearScreen();
-        do Output.moveCursor(0, 0);
-        do Output.printString("Input: ");
-        do Output.printString(input);
-        do Output.println();
-        do Output.printString("Result: ");
+    function void updateResult(String input, Result result) {
+        do Printer.print(s_input);
+        do Printer.println(input);
+        if (result.isOk()) {
+            do Printer.drop("Result: ");
+        }
+        else {
+            do Printer.drop("Error: ");
+        }
+        do Printer.println(result.unwrap());
+        do result.dispose();
 
-        let result = Eval.eval(input);
-        do Output.printString(result);
-        do result.dispose(); // Freeing stuff so make calculator op
-
-        do Output.println();
-        do Output.println();
-        do Output.printString("How to use: ");
-        do Output.println();
-        do Output.printString("1. Enter an expression, get result instantly.");
-        do Output.println();
-        do Output.printString("2. Press the backspace to delete a character.");
-        do Output.println();
-        do Output.printString("3. Ignores spaces, letters, your name, pincode, birthday, etc.");
-        do Output.println();
-        do Output.printString("4. Supports +, -, *, /, brackets, numbers greater 32767.");
-        do Output.println();
-        do Output.printString("5. Does not support negativing expressions, mult by brackets.");
-        do Output.println();
-        do Output.printString("6. Press Shift + Q to quit.");
-        do Output.println();
-
-        do Output.printString("  _______");
-        do Output.println();
-        do Output.printString(" |       |");
-        do Output.println();
-        do Output.printString(" | (___) |");
-        do Output.println();
-        do Output.printString(" |       |");
-        do Output.println();
-        do Output.printString(" | 7 8 9 |");
-        do Output.println();
-        do Output.printString(" |       |");
-        do Output.println();
-        do Output.printString(" | 4 5 6 |");
-        do Output.println();
-        do Output.printString(" |       |");
-        do Output.println();
-        do Output.printString(" | 1 2 3 |");
-        do Output.println();
-        do Output.printString(" |       |");
-        do Output.println();
-        do Output.printString(" | + - = |");
-        do Output.println();
-        do Output.printString(" |_______|");
-        do Output.println();
-
-
-        return;
-    }
-
-    method void dispose() {
-        do reservedKeys.dispose();
+        if (input.length() < 864) {
+            do Printer.println(s_summary_0);
+            do Printer.println(s_summary_1);
+            do Printer.println(s_summary_2);
+            do Printer.println(s_summary_3);
+            do Printer.println(s_summary_4);
+            do Printer.println(s_summary_5);
+            do Printer.println(s_summary_6);
+        }
+        if (input.length() < 96) {
+            do Printer.println(s_summary_7);
+            do Printer.println(s_summary_8);
+            do Printer.println(s_summary_9);
+            do Printer.println(s_summary_10);
+            do Printer.println(s_summary_11);
+            do Printer.println(s_summary_12);
+            do Printer.println(s_summary_13);
+            do Printer.println(s_summary_14);
+            do Printer.println(s_summary_15);
+            do Printer.println(s_summary_16);
+            do Printer.println(s_summary_17);
+            do Printer.println(s_summary_18);
+        }
+        
         return;
     }
 }

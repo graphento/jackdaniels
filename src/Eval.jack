@@ -1,15 +1,20 @@
 class Eval {
-    field Stack ops;
-    field Stack vals;
-    field String numberBuilder;
-    field int result;
-    field String error;
-
+    static String s_error_uob;
+    static String s_error_ucb;
+    static String s_error_mop;
+    static String s_error_oop;
+    static String s_error_tln;
+    static Result internalSuccess;
 
     static char CHAR_ADD;
     static char CHAR_SUB;
     static char CHAR_MUL;
     static char CHAR_DIV;
+    static char CHAR_EQ;
+    static char CHAR_GT;
+    static char CHAR_LT;
+    static char CHAR_MIN;
+    static char CHAR_MAX;
     static char CHAR_LEFT_PAR;
     static char CHAR_RIGHT_PAR;
 
@@ -21,11 +26,33 @@ class Eval {
     static Array charToPriority;
     static Array charToPurpose;
 
+    static Stack ops, vals;
+    static char c;
+    static int i, purpose;
+    static Result internalResult;
+    static String numberBuilder, result;
+    static boolean loop;
+
+    static char op;
+    static int secondVal, firstVal;
+
     function void init() {
+        let s_error_uob = "Unclosed opening bracket";
+        let s_error_ucb = "Unopened closing bracket";
+        let s_error_mop = "Missing operand";
+        let s_error_oop = "Theres just some op or nothing";
+        let s_error_tln = "Too long number";
+        let internalSuccess = Result.ok(""); // no need to ever dispose
+
         let CHAR_ADD = 43;
         let CHAR_SUB = 45;
         let CHAR_MUL = 42;
         let CHAR_DIV = 47;
+        let CHAR_EQ = 61;
+        let CHAR_GT = 62;
+        let CHAR_LT = 60;
+        let CHAR_MIN = 109;
+        let CHAR_MAX = 77;
         let CHAR_LEFT_PAR = 40;
         let CHAR_RIGHT_PAR = 41;
 
@@ -39,15 +66,24 @@ class Eval {
         let charToPriority[CHAR_SUB] = 100;
         let charToPriority[CHAR_MUL] = 200;
         let charToPriority[CHAR_DIV] = 200;
+        let charToPriority[CHAR_EQ] = 20;
+        let charToPriority[CHAR_GT] = 20;
+        let charToPriority[CHAR_LT] = 20;
+        let charToPriority[CHAR_MIN] = 50;
+        let charToPriority[CHAR_MAX] = 50;
         let charToPriority[CHAR_LEFT_PAR] = 0;
         let charToPriority[CHAR_RIGHT_PAR] = 32767;
 
         let charToPurpose = Array.new(128);
-
         let charToPurpose[CHAR_ADD] = PURP_OP;
         let charToPurpose[CHAR_SUB] = PURP_OP;
         let charToPurpose[CHAR_MUL] = PURP_OP;
         let charToPurpose[CHAR_DIV] = PURP_OP;
+        let charToPurpose[CHAR_EQ] = PURP_OP;
+        let charToPurpose[CHAR_GT] = PURP_OP;
+        let charToPurpose[CHAR_LT] = PURP_OP;
+        let charToPurpose[CHAR_MIN] = PURP_OP;
+        let charToPurpose[CHAR_MAX] = PURP_OP;
 
         let charToPurpose[CHAR_LEFT_PAR] = PURP_LEFT_PAR;
         let charToPurpose[CHAR_RIGHT_PAR] = PURP_RIGHT_PAR;
@@ -63,20 +99,23 @@ class Eval {
         let charToPurpose[56] = PURP_DIGIT;
         let charToPurpose[57] = PURP_DIGIT;
 
-        return;
-    }
-
-    function String eval(String s) {
-        var Stack ops, vals;
-        var char c;
-        var int i, purpose;
-        var Result internalResult;
-        var String numberBuilder, result;
-
         let ops = Stack.new(100);
         let vals = Stack.new(100);
         let numberBuilder = String.new(5);
         let result = String.new(6);
+
+        return;
+    }
+
+    function String eval(String s) {
+        do ops.clear();
+        do vals.clear();
+        while (numberBuilder.length() > 0) {
+            do numberBuilder.eraseLastChar();
+        }
+        while (result.length() > 0) {
+            do result.eraseLastChar();
+        }
 
         let i = 0;
         while (i < s.length()) {
@@ -84,37 +123,72 @@ class Eval {
             let purpose = charToPurpose[c];
 
             if (purpose = PURP_DIGIT) {
-                do Eval.internalHandleDigit(numberBuilder, c);
+                if (numberBuilder.length() = 5) {
+                    return Result.error(s_error_tln);
+                }
+                do numberBuilder.appendChar(c);
             }
             else {
-                do Eval.internalBuildNumber(vals, numberBuilder);
+                do Eval.internalBuildNumber();
             }
 
             if (purpose = PURP_LEFT_PAR) {
-                do Eval.internalHandleLeftPar(ops, c);
+                do ops.push(CHAR_LEFT_PAR);
             }
+
             if (purpose = PURP_RIGHT_PAR) {
-                let internalResult = Eval.internalHandleRightPar(ops, vals);
-                if (internalResult.isError()) {
-                    return internalResult.getResult();
+                let loop = true;
+                while(loop) {
+                    if (ops.isEmpty()) {
+                        return Result.error(s_error_ucb);
+                    }
+                    else {
+                        if (charToPurpose[ops.top()] = PURP_LEFT_PAR) {
+                            let loop = false;
+                        }
+                        else {
+                            let internalResult = Eval.internalEval();
+                            if (internalResult.isError()) {
+                                return internalResult;
+                            }
+                        }
+                    }
                 }
+
+                do ops.pop();
             }
+
             if (purpose = PURP_OP) {
-                let internalResult = Eval.internalHandleOp(ops, vals, c);
-                if (internalResult.isError()) {
-                    return internalResult.getResult();
+                let loop = true;
+                while(loop) {
+                    if (ops.isEmpty()) {
+                        let loop = false;
+                    }
+                    else {
+                        if (charToPriority[ops.top()] < charToPriority[c]) {
+                            let loop = false;
+                        }
+                        else {
+                            let internalResult = Eval.internalEval();
+                            if (internalResult.isError()) {
+                                return internalResult;
+                            }
+                        }
+                    }
                 }
+
+                do ops.push(c);
             }
 
             let i = i + 1;
         }
 
-        do Eval.internalBuildNumber(vals, numberBuilder);
+        do Eval.internalBuildNumber();
 
-        while (~(ops.isEmpty())) {
-            let internalResult = Eval.internalEval(ops, vals);
+        while (ops.size() > 0) {
+            let internalResult = Eval.internalEval();
             if (internalResult.isError()) {
-                return internalResult.getResult();
+                return internalResult;
             }
         }
 
@@ -124,34 +198,26 @@ class Eval {
         else {
             do result.setInt(0);
         }
-
-        // free memory cuz it is important as fuck
-        do vals.dispose();
-        do ops.dispose();
-        do numberBuilder.dispose();
-
-        return result;
+        
+        return Result.ok(result);
     }
 
-    function Result internalEval(Stack ops, Stack vals) {
-        var char op;
-        var int secondVal, firstVal;
-        var Result result;
+    function Result internalEval() {
         // op is always present
         let op = ops.pop();
         if (~(charToPurpose[op] = PURP_OP)) {
-            return Result.new("Unclosed opening bracket", false);
+            return Result.error(s_error_uob);
         }
         if (vals.size() = 1) {
-            return Result.new("Missing operand", false);
+            return Result.error(s_error_mop);
         }
         if (vals.size() = 0) {
-            return Result.new("Theres just some op", false);
+            return Result.error(s_error_oop);
         }
         let secondVal = vals.pop();
         let firstVal = vals.pop();
         do vals.push(Eval.internalApplyOp(firstVal, secondVal, op));
-        return Result.new(true, true);
+        return internalSuccess;
     }
 
     function int internalApplyOp(int a, int b, char op) {
@@ -167,80 +233,57 @@ class Eval {
         if (op = CHAR_DIV) {
             return a / b;
         }
+        if (op = CHAR_EQ) {
+            if (a = b) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+        if (op = CHAR_GT) {
+            if (a > b) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+        if (op = CHAR_LT) {
+            if (a < b) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+        if (op = CHAR_MIN) {
+            if (a < b) {
+                return a;
+            }
+            else {
+                return b;
+            }
+        }
+        if (op = CHAR_MAX) {
+            if (a > b) {
+                return a;
+            }
+            else {
+                return b;
+            }
+        }
         do Sys.error(2300);
         return 0;
     }
 
-    function void internalBuildNumber(Stack vals, String numberBuilder) {
+    function void internalBuildNumber() {
         if (numberBuilder.length() > 0) {
             do vals.push(numberBuilder.intValue());
-            // cringy clear, but this fucking string sucks no cap
             while (numberBuilder.length() > 0) {
                 do numberBuilder.eraseLastChar();
             }
         }
         return;
-    }
-
-    function void internalHandleDigit(String numberBuilder, char c) {
-        do numberBuilder.appendChar(c);
-        return;
-    }
-
-    function void internalHandleLeftPar(Stack ops, char c) {
-        do ops.push(CHAR_LEFT_PAR);
-        return;
-    }
-
-    function Result internalHandleRightPar(Stack ops, Stack vals) {
-        var boolean loop;
-        var Result result;
-
-        let loop = true;
-        while(loop) {
-            if (ops.isEmpty()) {
-                return Result.new("Unopened closing bracket", false);
-            }
-            else {
-                if (charToPurpose[ops.top()] = PURP_LEFT_PAR) {
-                    let loop = false;
-                }
-                else {
-                    let result = Eval.internalEval(ops, vals);
-                    if (result.isError()) {
-                        return result;
-                    }
-                }
-            }
-        }
-
-        do ops.pop();
-        return Result.new(true, true);
-    }
-
-    function Result internalHandleOp(Stack ops, Stack vals, char c) {
-        var boolean loop;
-        var Result result;
-
-        let loop = true;
-        while(loop) {
-            if (ops.isEmpty()) {
-                let loop = false;
-            }
-            else {
-                if (charToPriority[ops.top()] < charToPriority[c]) {
-                    let loop = false;
-                }
-                else {
-                    let result = Eval.internalEval(ops, vals);
-                    if (result.isError()) {
-                        return result;
-                    }
-                }
-            }
-        }
-
-        do ops.push(c);
-        return Result.new(true, true);
     }
 }

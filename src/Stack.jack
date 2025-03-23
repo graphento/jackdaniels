@@ -1,9 +1,13 @@
+// Supposed to be stable
 class Stack {
     field int capacity;
     field int size;
     field Array elements;
 
     constructor Stack new(int maxSize) {
+        if (maxSize < 0) {
+            do Sys.error(2204);
+        }
         let capacity = maxSize;
         let size = 0;
         let elements = Array.new(maxSize);
@@ -52,7 +56,10 @@ class Stack {
     }
 
     method void dispose() {
-        do elements.dispose();
+        if (~(elements = 0)) {
+            do elements.dispose();
+        }
+        do Memory.deAlloc(this);
         return;
     }
 }

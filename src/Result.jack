@@ -1,22 +1,44 @@
+// Supposed to be stable
 class Result {
-    field int result;
-    field boolean ok;
+    field String result;
+    field String error;
+    field boolean success;
 
-    constructor Result new(int res, boolean success) {
-        let result = res;
-        let ok = success;
+    constructor Result ok(String value) {
+        let result = value;
+        let success = true;
+        return this;
+    }
+
+    constructor Result error(String value) {
+        let error = value;
+        let success = false;
         return this;
     }
 
     method boolean isOk() {
-        return ok;
+        return success;
     }
 
     method boolean isError() {
-        return ~ok;
+        return ~success;
     }
 
-    method int getResult() {
-        return result;
+    method String unwrap() {
+        if (success) {
+            return result;
+        }
+        else {
+            return error;
+        }
+    }
+
+    method void dispose() {
+        if (success) {
+            do result.dispose();
+        }
+        // Does not dispose error cuz it is constant
+        do Memory.deAlloc(this);
+        return;
     }
 }
