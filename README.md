@@ -1,4 +1,4 @@
-# jackdaniels
+# Calcujacktor
 ### Чтобы запустить:
 1. Зайди в папку vm и скопируй содержимое файла
 2. Зайди на [wed-ide](https://nand2tetris.github.io/web-ide/vm) aka новый крутой(нет) эмулятор
