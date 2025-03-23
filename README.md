@@ -1,2 +1,11 @@
 # jackdaniels
-we there make one-time-use-ever apps with jack
+### Чтобы запустить:
+1. Зайди в папку vm и скопируй содержимое файла
+2. Зайди на [wed-ide](https://nand2tetris.github.io/web-ide/vm) aka новый крутой(нет) эмулятор
+3. Ctrl + A на окошке VM Code слева, Ctrl + V чтобы вставить код программы
+4. Ползунок скорости в том же окошке на Fast
+5. В том же окошке жмать Run(две стрелочки на иконке)
+6. Жмешь enable keyboard и пользуешься
+7. Да муторно зато не надо ничего скачивать :<
+
+known bug: heap overflow но над этим идет работа
