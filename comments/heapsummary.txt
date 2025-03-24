@@ -1,7 +1,0 @@
-heap can hold 8192 - 2048 = 6144 registers
-
-heap summary:
-- input string for full screen: 1401 + 2
-- output string: 6 + 2
-- calculator summary: (10 * 12 + 2 * 12) + 12 + 45 + 45 + 62 + 59 + 61 + 27 + 2 * 7 = 469
-- мне лень писать дальше сори

@@ -19,13 +19,6 @@ class Printer {
         return;
     }
 
-    function void dropsp(String s) {
-        do Output.printString(s);
-        do s.dispose();
-        do Output.printChar(32);
-        return;
-    }
-
     function void println(String s) {
         do Output.printString(s);
         do Output.println();
@@ -37,19 +30,8 @@ class Printer {
         return;
     }
 
-    function void printsp(String s) {
-        do Output.printString(s);
-        do Output.printChar(32);
-        return;
-    }
-
     function void ln() {
         do Output.println();
-        return;
-    }
-
-    function void sp() {
-        do Output.printChar(32);
         return;
     }
 

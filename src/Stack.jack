@@ -5,8 +5,8 @@ class Stack {
     field Array elements;
 
     constructor Stack new(int maxSize) {
-        if (maxSize < 0) {
-            do Sys.error(2204);
+        if (maxSize < 1) {
+            do Sys.error(2203);
         }
         let capacity = maxSize;
         let size = 0;

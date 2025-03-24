@@ -1,9 +1,9 @@
 class Eval {
-    static String s_error_uob;
-    static String s_error_ucb;
-    static String s_error_mop;
-    static String s_error_oop;
-    static String s_error_tln;
+    static String s_error_unclosed_bracket;
+    static String s_error_unopened_bracket;
+    static String s_error_missing_op;
+    static String s_error_only_op_present;
+    static String s_error_too_long_number;
     static Result internalSuccess;
 
     static char CHAR_ADD;
@@ -37,24 +37,24 @@ class Eval {
     static int secondVal, firstVal;
 
     function void init() {
-        let s_error_uob = "Unclosed opening bracket";
-        let s_error_ucb = "Unopened closing bracket";
-        let s_error_mop = "Missing operand";
-        let s_error_oop = "Theres just some op or nothing";
-        let s_error_tln = "Too long number";
+        let s_error_unclosed_bracket = "Unclosed opening bracket";
+        let s_error_unopened_bracket = "Unopened closing bracket";
+        let s_error_missing_op = "Missing operand";
+        let s_error_only_op_present = "Theres just some op or nothing";
+        let s_error_too_long_number = "Too long number";
         let internalSuccess = Result.ok(""); // no need to ever dispose
 
-        let CHAR_ADD = 43;
-        let CHAR_SUB = 45;
-        let CHAR_MUL = 42;
-        let CHAR_DIV = 47;
-        let CHAR_EQ = 61;
-        let CHAR_GT = 62;
-        let CHAR_LT = 60;
-        let CHAR_MIN = 109;
-        let CHAR_MAX = 77;
-        let CHAR_LEFT_PAR = 40;
-        let CHAR_RIGHT_PAR = 41;
+        let CHAR_ADD = 43;       // +
+        let CHAR_SUB = 45;       // -
+        let CHAR_MUL = 42;       // *
+        let CHAR_DIV = 47;       // /
+        let CHAR_EQ = 61;        // =
+        let CHAR_GT = 62;        // >
+        let CHAR_LT = 60;        // <
+        let CHAR_MIN = 109;      // m
+        let CHAR_MAX = 77;       // M
+        let CHAR_LEFT_PAR = 40;  // (
+        let CHAR_RIGHT_PAR = 41; // )
 
         let PURP_OP = 1;
         let PURP_LEFT_PAR = 2;
@@ -124,7 +124,7 @@ class Eval {
 
             if (purpose = PURP_DIGIT) {
                 if (numberBuilder.length() = 5) {
-                    return Result.error(s_error_tln);
+                    return Result.error(s_error_too_long_number);
                 }
                 do numberBuilder.appendChar(c);
             }
@@ -140,7 +140,7 @@ class Eval {
                 let loop = true;
                 while(loop) {
                     if (ops.isEmpty()) {
-                        return Result.error(s_error_ucb);
+                        return Result.error(s_error_unopened_bracket);
                     }
                     else {
                         if (charToPurpose[ops.top()] = PURP_LEFT_PAR) {
@@ -206,13 +206,13 @@ class Eval {
         // op is always present
         let op = ops.pop();
         if (~(charToPurpose[op] = PURP_OP)) {
-            return Result.error(s_error_uob);
+            return Result.error(s_error_unclosed_bracket);
         }
         if (vals.size() = 1) {
-            return Result.error(s_error_mop);
+            return Result.error(s_error_missing_op);
         }
         if (vals.size() = 0) {
-            return Result.error(s_error_oop);
+            return Result.error(s_error_only_op_present);
         }
         let secondVal = vals.pop();
         let firstVal = vals.pop();

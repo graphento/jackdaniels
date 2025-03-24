@@ -56,7 +56,7 @@ class Calculator {
     }
 
     function void start() {
-        let input = String.new(1401); // fill full fucking screen with input lol
+        let input = String.new(1400); // Достаточно чтобы забить весь экран символами
         let exit = false;
 
         do Calculator.updateResult(input, Eval.eval(input));
@@ -105,7 +105,7 @@ class Calculator {
         do Printer.println(result.unwrap());
         do result.dispose();
 
-        if (input.length() < 864) {
+        if (input.length() < 864) { // кол-во символов во вводе до скрытия подсказок
             do Printer.println(s_summary_0);
             do Printer.println(s_summary_1);
             do Printer.println(s_summary_2);
@@ -114,7 +114,7 @@ class Calculator {
             do Printer.println(s_summary_5);
             do Printer.println(s_summary_6);
         }
-        if (input.length() < 96) {
+        if (input.length() < 96) { // кол-во символов во вводе до скрытия арта
             do Printer.println(s_summary_7);
             do Printer.println(s_summary_8);
             do Printer.println(s_summary_9);
